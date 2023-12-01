@@ -1,9 +1,17 @@
- <html xmlns="http://www.w3.org/1999/xhtml">    
-  <head>      
-    <title>Beni Desconto</title>
-  </head>    
-  <body> 
-    <h1>Redirecionamento de Link</h1>
-    <p>Pagina em manutenção!</p> 
-  </body>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Beni Desconto</title>
+</head>
+<body>
+  <h1>Redirecionamento de Link</h1>
+  <p>Pagina em manutenção!</p>
+  <h4 id="linkto"></h4>
+  <script>
+    let params = (new URL(document.location)).searchParams;
+    let to = params.get("to");
+    console.log(to);
+    let elLinkTo = document.querySelector('#linkto');
+    elLinkTo.innerHTML = to;
+  </script>
+</body>
 </html>
