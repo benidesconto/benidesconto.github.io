@@ -11,7 +11,7 @@
             letter-spacing: -1px;
         }
 
-        section#urlbox {
+        section.urlbox {
             margin: 0 auto 20px auto;
             max-width: 758px;
             box-shadow: 0 1px 4px #ccc;
@@ -21,23 +21,23 @@
             text-align: center;
         }
 
-        section#urlbox h1 {
+        section.urlbox h1 {
             margin: 10px auto 30px auto;
         }
 
-        #formwrapper {
+        .formwrapper {
             display: block;
             margin-top: 0em;
         }
 
-        #formurl {
+        .formurl {
             display: table;
             max-width: 800px;
             margin: 0 auto;
             -webkit-box-sizing: border-box;
         }
 
-        #formurl input[type=text] {
+        .formurl input[type=text] {
             display: table-cell;
             width: 100%;
             height: 56px;
@@ -69,15 +69,15 @@
             margin: 0em;
         }
 
-        #formurl #formbutton {
+        .formurl .wrapperbutton {
             display: table-cell;
             width: 1%;
             box-sizing: border-box;
             vertical-align: middle;
         }
 
-        #formurl input[type=button],
-        #formurl input[type=submit] {
+        .formurl input[type=button],
+        .formurl input[type=submit] {
             height: 56px;
             padding: 10px 16px;
             font: bold 16px oxygen, arial;
@@ -111,12 +111,12 @@
         <h2>Serviço de redirecionamento de link para os ecommerce's oficiais</h2>
         <!-- <p>Pagina em manutenção!</p> -->
         <h2 style="color: red;" id="aviso"></h2>
-        <section id="urlbox">
+        <section class="urlbox">
             <h1>Cole a URL para ser encurtada</h1>
-            <div id="formwrapper">
-                <div id="formurl">
-                    <input id="url_link" type="text" name="u" placeholder="Cole o link aqui">
-                    <div id="formbutton">
+            <div class="formwrapper">
+                <div class="formurl">
+                    <input class="url_field" id="url_link" type="text" name="u" placeholder="Cole o link aqui">
+                    <div class="wrapperbutton" id="formbutton">
                         <input type="button" value="Encurtar URL">
                     </div>
                 </div>
@@ -124,8 +124,16 @@
             <p class="boxtextcenter">Encurtador é uma ferramenta para encurtar URLs e gerar links curtos<br>Com o
                 encurtador de URL é possível criar um link encurtado fácil de compartilhar</p>
         </section>
-        <section id="urlbox">
-            <h1 id="url_gerada"></h1>
+        <section id="session_url_gerada" class="urlbox" style="display: none;">
+            <div class="formwrapper">
+                <div class="formurl">
+                    <input class="url_field" id="url_gerada" type="text" name="u" disabled="true">
+                    <div class="wrapperbutton" id="copy_url">
+                        <input type="button" value="Copiar URL">
+                    </div>
+                </div>
+            </div>
+            <h3 id="gerada_aviso" style="color: green;"></h3>
         </section>
     </div>
 
@@ -206,56 +214,75 @@
             return { jsonContent, sha };
         }
 
+        async function createRedirectLink() {
+            let elUrl = document.querySelector('#url_link');
+            let urlRedir = elUrl.value;
+            if (!urlRedir) {
+                document.querySelector('#aviso').innerHTML = 'Inclua uma URL no campo abaixo';
+
+                return;
+            }
+
+            let keyLink = generateKey();
+
+            let baseFile = keyLink.substring(0, 2);
+            // let baseFile = 'th'; //Teste
+            let field = keyLink.substring(2, keyLink.length);
+
+            let { jsonContent, sha } = await getJsonFile(baseFile);
+
+            jsonContent[field] = { url: urlRedir, create: Date.now() }
+
+            console.log(JSON.stringify(jsonContent, null, 2));
+
+            let result = await atualizarJsonContent(baseFile, jsonContent, sha);
+            // console.log(result.toString());
+            document.querySelector('#session_url_gerada').style.removeProperty('display');
+            document.querySelector('#url_gerada').value = `https://benidesconto.com.br/link/?to=${baseFile}${field}`
+        }
+
+
+        async function atualizarJsonContent(baseFile, jsonContent, sha) {
+            const AUTHOR_NAME = "benidesconto@gmail.com"
+            const AUTHOR_EMAIL = "Beni Desconto"
+
+            const user_info = {
+                name: AUTHOR_NAME,
+                email: AUTHOR_EMAIL
+            }
+            return repoApi.rest.repos.createOrUpdateFileContents({
+                owner: 'benidesconto',
+                repo: 'link',
+                path: `${baseFile}/${baseFile}.json`,
+                message: `Atualizando ${baseFile} com link`,
+                content: b64EncodeUnicode(JSON.stringify(jsonContent, null, 2)),
+                committer: { ...user_info },
+                author: { ...user_info },
+                sha: sha
+            })
+        }
+
         document.querySelector('#formbutton').addEventListener('click', () => {
-            complete();
+            createRedirectLink();
+        })
 
-            async function complete() {
-                let elUrl = document.querySelector('#url_link');
-                let urlRedir = elUrl.value;
-                if (!urlRedir) {
-                    document.querySelector('#aviso').innerHTML = 'Inclua uma URL no campo abaixo';
+        function copySmallLinkToClipboard() {
+            // Get the text field
+            var urlGerada = document.querySelector("#url_gerada");
 
-                    return;
-                }
+            // Select the text field
+            urlGerada.select();
+            urlGerada.setSelectionRange(0, 99999); // For mobile devices
 
-                let keyLink = generateKey();
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(urlGerada.value);
 
-                let baseFile = keyLink.substring(0, 2);
-                // let baseFile = 'th'; //Teste
-                let field = keyLink.substring(2, keyLink.length);
-
-                let { jsonContent, sha } = await getJsonFile(baseFile);
-
-                jsonContent[field] = { url: urlRedir, create: Date.now() }
-
-                console.log(JSON.stringify(jsonContent, null, 2));
-
-                let result = await atualizarJsonContent(baseFile, jsonContent, sha);
-                console.log(result.toString());
-                document.querySelector('#url_gerada').innerHTML = `https://benidesconto.com.br/link/?to=${baseFile}${field}`
-            }
-
-
-            async function atualizarJsonContent(baseFile, jsonContent, sha) {
-                const AUTHOR_NAME = "benidesconto@gmail.com"
-                const AUTHOR_EMAIL = "Beni Desconto"
-
-                const user_info = {
-                    name: AUTHOR_NAME,
-                    email: AUTHOR_EMAIL
-                }
-                return repoApi.rest.repos.createOrUpdateFileContents({
-                    owner: 'benidesconto',
-                    repo: 'link',
-                    path: `${baseFile}/${baseFile}.json`,
-                    message: `Atualizando ${baseFile} com link`,
-                    content: b64EncodeUnicode(JSON.stringify(jsonContent, null, 2)),
-                    committer: { ...user_info },
-                    author: { ...user_info },
-                    sha: sha
-                })
-            }
-
+            // Alert the copied text
+            console.log("Copied the text: " + urlGerada.value);
+            document.querySelector('#gerada_aviso').innerHTML = 'Url copiada com sucesso!'
+        }
+        document.querySelector('#copy_url').addEventListener('click', () => {
+            copySmallLinkToClipboard();
         })
     </script>
 </body>
