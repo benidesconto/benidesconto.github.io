@@ -26,7 +26,7 @@
                 if (content.ok) {
                     content.json().then(cntJson => {
                         console.log(cntJson);
-                        let url = cntJson[field];
+                        let url = cntJson[field].url;
                         console.log(url);
                         if (url) {
                             window.location.replace(url);
