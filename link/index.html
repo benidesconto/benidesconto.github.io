@@ -1,17 +1,59 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="en">
+
 <head>
-  <title>Beni Desconto</title>
+    <title>Beni Desconto</title>
 </head>
+
 <body>
-  <h1>Redirecionamento de Link</h1>
-  <p>Pagina em manutenção!</p>
-  <h4 id="linkto"></h4>
-  <script>
-    let params = (new URL(document.location)).searchParams;
-    let to = params.get("to");
-    console.log(to);
-    let elLinkTo = document.querySelector('#linkto');
-    elLinkTo.innerHTML = to;
-  </script>
+    <div style="text-align: center;">
+        <h1>Beni Desconto</h1>
+        <h3>Serviço de redirecionamento de link para os ecommerce's oficiais</h3>
+        <p>Pagina em manutenção!</p>
+        <h6 id="aviso"></h6>
+    </div>
+    <h4 id="linkto"></h4>
+    <p id="file"></p>
+    <p id="field"></p>
+    <p id="url"></p>
+    <script>
+        let base = 'linkUtilitario';
+        window[base] = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2JlbmlkZXNjb250by9saW5rL21haW4v';
+        let params = (new URL(document.location)).searchParams;
+        let to = params.get("to");
+        console.log(to);
+        let elLinkTo = document.querySelector('#linkto');
+        elLinkTo.innerHTML = to;
+        if ((to || '').length > 2) {
+            let baseFile = to.substring(0, 2);
+            let field = to.substring(2, to.length);
+            document.querySelector('#file').innerHTML = baseFile;
+            document.querySelector('#field').innerHTML = field;
+            // https://benidesconto.com.br/link/?to=f12j3n
+            fetch(atob(window[base]).toString() + `${baseFile}/${baseFile}.json`).then(content => {
+                if (content.ok) {
+                    content.json().then(cntJson => {
+                        console.log(cntJson);
+                        let url = cntJson[field];
+                        document.querySelector('#url').innerHTML = 'Redirecionando para ' + url;
+                        console.log(url);
+                        
+                        setTimeout(() => {
+                            if (url) {
+                                window.location.replace(url);
+                            }else{
+                                document.querySelector('#aviso').innerHTML = 'Link não encontrado';
+                            }
+                        }, 50);
+                    });
+                }else{
+                    document.querySelector('#aviso').innerHTML = 'Link não cadastrado';
+                }
+            });
+        }else{
+            document.querySelector('#aviso').innerHTML = 'Os links do Beni Desconto são no modelo: https://benidesconto.com.br/link/?to=f22j3m';
+        }
+        </script>
 </body>
+
 </html>
