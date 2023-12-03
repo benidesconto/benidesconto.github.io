@@ -132,10 +132,6 @@
     <script type="module">
         //import { Octokit } from "https://esm.sh/@octokit/rest";
         import { Octokit } from "https://esm.sh/@octokit/rest@20.0.2";
-
-        // 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
-        // 
-
         let tmp929394953 = '98mdbHu11qUWUe';
         let tmp929394951 = 'ghp_KvhxfP25';
         let tmp929394952 = 'SJ7vXzpRi2NctN';
@@ -223,8 +219,8 @@
 
                 let keyLink = generateKey();
 
-                // let baseFile = keyLink.substring(0, 2);
-                let baseFile = 'th';
+                let baseFile = keyLink.substring(0, 2);
+                // let baseFile = 'th'; //Teste
                 let field = keyLink.substring(2, keyLink.length);
 
                 let { jsonContent, sha } = await getJsonFile(baseFile);
