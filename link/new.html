@@ -138,13 +138,10 @@
     </div>
 
     <script type="module">
-        //import { Octokit } from "https://esm.sh/@octokit/rest";
         import { Octokit } from "https://esm.sh/@octokit/rest@20.0.2";
-
         let tmp929394953 = 'DyUvW47z3opeQh';
         let tmp929394951 = 'ghp_fU0Cq5BQ';
         let tmp929394952 = 'Tw8Wb8uGWUOTcV';
-        console.log('Antes do login')
         let gitApi = new Octokit({ auth: tmp929394951 + tmp929394952 + tmp929394953 });
         window['repoApi'] = gitApi;
     </script>
@@ -177,6 +174,25 @@
             console.log(generateKey());
         }
 
+        function changeQueryString(qryKey, qryValue){
+            qryValue = encodeURI(qryValue);
+            var url = new URL(window.location);
+            (url.searchParams.has(qryKey) ? url.searchParams.set(qryKey, qryValue) : url.searchParams.append(qryKey, qryValue));
+            url.search = url.searchParams;
+            url        = url.toString();
+            history.pushState({}, null, url);
+        }
+        
+        function setInputWithQueryString(){
+            let qryKey = 'link';
+            var url = new URL(window.location);
+            if(url.searchParams.has(qryKey)){
+                let qryValue = url.searchParams.get(qryKey)
+                if(qryValue){
+                    document.querySelector('#url_link').value = decodeURI(qryValue);
+                }
+            }
+        }
     </script>
 
     <script>
@@ -264,7 +280,12 @@
 
         document.querySelector('#formbutton').addEventListener('click', () => {
             createRedirectLink();
-        })
+        });
+        
+        document.querySelector('#url_link').addEventListener('keyup', function (){
+            console.log('changing url link');
+            changeQueryString('link', this.value);
+        });
 
         function copySmallLinkToClipboard() {
             // Get the text field
@@ -283,7 +304,9 @@
         }
         document.querySelector('#copy_url').addEventListener('click', () => {
             copySmallLinkToClipboard();
-        })
+        });
+
+        setInputWithQueryString();
     </script>
 </body>
 
